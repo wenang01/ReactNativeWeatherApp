@@ -25,6 +25,7 @@ export default class extends Component {
 
     this.state = {
       data: {},
+      current: {},
       latitude: 0.0,
       longitude: 0.0,
 
@@ -34,26 +35,37 @@ export default class extends Component {
 
   }
 
+  weatherDataDaily = {}
   weatherComponent = []
   componentDidMount() {
 
-    // const url = "https://api.openweathermap.org/data/2.5/"
-    const url = "https://api.openweathermap.org/data/2.5/onecall?lat=-6.2329&lon=106.8345&cnt=7&lang=id&appid=d940c4e17f65b1374292e212fb63c2f8"
+    const url = "https://api.openweathermap.org/data/2.5/onecall?"
+    // const url = "https://api.openweathermap.org/data/2.5/onecall?lat=-6.2329&lon=106.8345&cnt=7&lang=id&appid=d940c4e17f65b1374292e212fb63c2f8"
     const appid = "d940c4e17f65b1374292e212fb63c2f8"
     let isMounted = true;
     axios.get(url, {
       params: {
         lat: this.state.latitude,
         lon: this.state.longitude,
-        appid: appid
+        cnt: 7,
+        lang: "id",
+        appid: appid,
+
       }
     }).then((response) => {
-      console.log(response.data.daily[0].weather[0].icon);
+
+      // this.setState({
+      //   current: response.data.current
+      // })
+      console.log("CURRENT WEATHER DATA=====================================================")
+      // console.log(this.state.current)
+      console.log(response.data.current.weather[0].description)
+      console.log("CURRENT WEATHER DATA=====================================================")
+      // console.log(response.data.daily[0].weather[0].icon);
       if (isMounted)
         for (let i = 0; i < 7; i++) {
-          const weatherDataDaily = response.data.daily[i]
-          console.log(weatherDataDaily)
-          this.setState({ data: weatherDataDaily })
+          this.weatherDataDaily = response.data.daily[i]
+          console.log(this.weatherDataDaily)
           this.weatherComponent.push(
             // <Text size={BASE_SIZE * 0.875} muted>{response.data.daily[i].weather[0].description}</Text>
             <Block row center card shadow space="between" style={styles.card} >
@@ -74,6 +86,7 @@ export default class extends Component {
           )
           // console.log(this.state.data)
         }
+      this.setState({ data: this.weatherDataDaily })
       this.setState({
         data: response.data, icon: "http://openweathermap.org/img/w/" + response.data.daily[0].weather[0].icon + ".png"
       })
@@ -116,11 +129,26 @@ export default class extends Component {
   render() {
     // const renderItem = ({ item }) => <Item title={item.title} />
     return (
-      <ScrollView>
-        <Block>
-          {this.weatherComponent}
+      <Block>
+        <Block row center card shadow space="between" style={styles.card}>
+          <Image
+            style={styles.imageIcon}
+            source={{ uri: this.state.icon }}
+            resizeMode={"cover"} // <- needs to be "cover" for borderRadius to take effect on Android
+          />
+          <Block flex>
+            <Text size={BASE_SIZE * 1.125}>{this.state.data.timezone}</Text>
+            <Text size={BASE_SIZE * 1}>{this.state.data.description}</Text>
+            <Text size={BASE_SIZE * 0.875} muted></Text>
+          </Block>
         </Block>
-      </ScrollView>
+        <ScrollView>
+          <Block>
+            {this.weatherComponent}
+          </Block>
+        </ScrollView>
+      </Block>
+
       // <Block row center card shadow space="between" style={styles.card} >
       //   <Image
       //     style={styles.imageIcon}
